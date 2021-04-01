@@ -17,7 +17,7 @@ export interface ConnectionRepository{
     remove(connectionId: string): Promise<Result<void, Error>>
 }
 
-export type SendMessageFunction = (connectionId: string, messageText: string) => Result<void, Error>;
+export type SendMessageFunction = (connectionId: string, messageText: string) => Promise<Result<void, Error>>;
 
 
 export interface Message<TARGET_TYPES> {
