@@ -17,12 +17,13 @@ class JoinMessage implements Message<BroadcastMessageTarget>{
     public readonly type = 'JoinMessage';
     public readonly target: BroadcastMessageTarget = new BroadcastMessageTarget()
     
-    constructor(private readonly userId: string){}
+    constructor(private readonly userId: string, private readonly currentUsers: Array<string>){}
     
     toJsonString():string{
         return JSON.stringify({
             type: this.type,
-            message: `${this.userId}さんが入室しました。あいさつしまししょう。`
+            message: `${this.userId}さんが入室しました。あいさつしまししょう。`,
+            currentUsers: this.currentUsers
         })
     }
 }
@@ -31,12 +32,13 @@ class LeaveMessage implements Message<BroadcastMessageTarget>{
     public readonly type = 'LeaveMessage' as const;
     public readonly target: BroadcastMessageTarget = new BroadcastMessageTarget()
     
-    constructor(private readonly userId: string){}
+    constructor(private readonly userId: string, private readonly currentUsers: Array<string>){}
 
     toJsonString():string{
         return JSON.stringify({
             type: this.type,
-            message: `${this.userId}さんが退出しました。`
+            message: `${this.userId}さんが退出しました。`,
+            currentUsers: this.currentUsers 
         })
     }
 }
@@ -118,7 +120,7 @@ export class ChatApplication{
         if(handleConnectResult.isErr()) return [handleConnectResult];
         
         const welcomMessageResult = await this.manager.sendMessage(new WelcomeMessage(new ConnectionMessageTarget(connectionId)));
-        const joinMessageResult =  currentUsers.includes(userId) ? [] : await this.manager.sendMessage(new JoinMessage(userId));
+        const joinMessageResult =  currentUsers.includes(userId) ? [] : await this.manager.sendMessage(new JoinMessage(userId, [...currentUsers, userId]));
         
         return [...welcomMessageResult, ...joinMessageResult];
     }
@@ -135,7 +137,7 @@ export class ChatApplication{
         
         const user = userOfConnection.value;
         if(!currentUsers.includes(user.id)){
-            return await this.manager.sendMessage(new LeaveMessage(user.id));
+            return await this.manager.sendMessage(new LeaveMessage(user.id, currentUsers));
         }else{
             return [new Ok(undefined)];
         }

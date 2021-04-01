@@ -1,5 +1,5 @@
 import {ChatApplication} from '../../lib/app/chatapp';
-import {ConnectionManager, resolveMessageTarget, MessageTarget, Message, ConnectionMessageTarget, UserMessageTarget, BroadcastMessageTarget} from '../../lib/app/wsconn';
+import {ConnectionManager} from '../../lib/app/wsconn';
 import { Ok } from '../../lib/app/monad';
 import {ConnectionRepositoryMock} from './mock';
 
@@ -23,7 +23,7 @@ describe('ChatApplication', () => {
         
         expect(sendMessageFunc.mock.calls.length).toBe(5); //1 welcome message and 4 join messages
         expect(sendMessageFunc).toHaveBeenCalledWith('conn4', JSON.stringify({type:'WelcomeMessage' ,message:'ようこそチャットルームへ!!'})); // welcome message
-        const expectedJoinMessage = JSON.stringify({type:'JoinMessage' ,message:'user3さんが入室しました。あいさつしまししょう。'});
+        const expectedJoinMessage = JSON.stringify({type:'JoinMessage' ,message:'user3さんが入室しました。あいさつしまししょう。', currentUsers:['user1', 'user2', 'user3']});
         //join messages
         expect(sendMessageFunc).toHaveBeenCalledWith('conn1', expectedJoinMessage);
         expect(sendMessageFunc).toHaveBeenCalledWith('conn2', expectedJoinMessage);
@@ -92,7 +92,7 @@ describe('ChatApplication', () => {
         expect(res.every(r => r.isOk())).toBeTruthy();
         
         expect(res.length).toBe(2); // 2 leave messages;
-        const expectedLeaveMessage = JSON.stringify({type: 'LeaveMessage', message:'user1さんが退出しました。'});
+        const expectedLeaveMessage = JSON.stringify({type: 'LeaveMessage', message:'user1さんが退出しました。', currentUsers: ['user2']});
         expect(sendMessageFunc).toHaveBeenCalledWith('conn2', expectedLeaveMessage);
         expect(sendMessageFunc).toHaveBeenCalledWith('conn3', expectedLeaveMessage);
     })
