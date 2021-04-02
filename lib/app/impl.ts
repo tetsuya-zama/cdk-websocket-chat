@@ -18,9 +18,12 @@ export const apiGatewaySendMessageFunction: (managementApi: ApiGatewayManagement
     }
     
 export class DynamoDBConnectionRepositoryImpl implements ConnectionRepository{
-    private readonly client: DynamoDB.DocumentClient;
-    constructor(private readonly tableName: string, private readonly useridIdxName: string){
-        this.client = new DynamoDB.DocumentClient();
+    
+    constructor(
+        private readonly client: DynamoDB.DocumentClient, 
+        private readonly tableName: string, 
+        private readonly useridIdxName: string){
+
     }
     
     private parseItem(item: {[key:string]: any}): Connection{
