@@ -1,5 +1,5 @@
 import {createChatApp, ChatApplicationProps, Result, Ok, Err} from './app';
-import {APIGatewayProxyEventBase} from 'aws-lambda';
+import {APIGatewayProxyEventBase, APIGatewayProxyResult} from 'aws-lambda';
 
 type WebsocketEvent = APIGatewayProxyEventBase<{}>
 
@@ -19,7 +19,7 @@ function parsePropsFromEnvs(): Result<ChatApplicationProps, Error>{
     }
 }
 
-export const onConnectHandler = async (event: WebsocketEvent) => {
+export const onConnectHandler = async (event: WebsocketEvent):Promise<APIGatewayProxyResult> => {
     const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
@@ -31,14 +31,18 @@ export const onConnectHandler = async (event: WebsocketEvent) => {
     if(!!connectionId && !!user){
         const results = await app.onConnect(connectionId, user);
         results.filter((r): r is Err<void, Error> => r.isErr()).forEach(err => console.error(err.value));
+
+        return {statusCode: 200, body: ""}
     }else{
         console.error('Invalid Connect Event');
         console.error(JSON.stringify(event));
+
+        return {statusCode: 500, body: ""}
     }
     
 }
 
-export const onDisconnectHandler = async (event: WebsocketEvent) => {
+export const onDisconnectHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> => {
     const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
@@ -49,9 +53,13 @@ export const onDisconnectHandler = async (event: WebsocketEvent) => {
     if(!!connectionId){
         const results = await app.onDisconnect(connectionId);
         results.filter((r): r is Err<void, Error> => r.isErr()).forEach(err => console.error(err.value));
+
+        return {statusCode:200, body:""}
     }else{
         console.error('Invalid Disconnect Event');
         console.error(JSON.stringify(event));
+
+        return {statusCode:500, body:""}
     }
 }
 
@@ -86,7 +94,7 @@ function parseBody<T>(event: WebsocketEvent, typeGuard: (obj:any) => obj is T): 
     return typeGuard(body) ? new Ok(body) : new Err(new Error(`Cannot parse request body:${body}`));
 }
 
-export const roomMessageHandler = async (event: WebsocketEvent) =>{
+export const roomMessageHandler = async (event: WebsocketEvent):Promise<APIGatewayProxyResult> =>{
     const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
@@ -98,14 +106,18 @@ export const roomMessageHandler = async (event: WebsocketEvent) =>{
     if(parseBodyResult.isOk() && !!connectionId){
         const results = await app.onChatAction(connectionId, {type:"RoomMessage", payload: parseBodyResult.value.data});
         results.filter((r): r is Err<void, Error> => r.isErr()).forEach(err => console.error(err.value));
+
+        return {statusCode:200, body:""}
     }else{
         console.error('Invalid room message Event');
         console.error(JSON.stringify(event));
         if(parseBodyResult.isErr()) console.error(parseBodyResult.value);
+
+        return {statusCode: 500, body: ""}
     }
 } 
 
-export const directMessageHandler = async (event: WebsocketEvent) =>{
+export const directMessageHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> =>{
     const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
@@ -117,14 +129,18 @@ export const directMessageHandler = async (event: WebsocketEvent) =>{
     if(parseBodyResult.isOk() && !!connectionId){
         const results = await app.onChatAction(connectionId, {type:"DirectMessage", payload: parseBodyResult.value.data});
         results.filter((r): r is Err<void, Error> => r.isErr()).forEach(err => console.error(err.value));
+
+        return {statusCode:200, body:""}
     }else{
         console.error('Invalid direct message Event');
         console.error(JSON.stringify(event));
         if(parseBodyResult.isErr()) console.error(parseBodyResult.value);
+
+        return {statusCode:500,body:""}
     }
 }
 
-export const userListRequestHandler = async (event: WebsocketEvent) => {
+export const userListRequestHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> => {
     const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
@@ -135,9 +151,13 @@ export const userListRequestHandler = async (event: WebsocketEvent) => {
     if(!!connectionId){
         const results = await app.onChatAction(connectionId, {type: "UserlistRequest"});
         results.filter((r): r is Err<void, Error> => r.isErr()).forEach(err => console.error(err.value));
+
+        return {statusCode:200, body:""}
     }else{
         console.error('Invalid Disconnect Event');
         console.error(JSON.stringify(event));
+
+        return {statusCode:500, body:""}
     }
 }
 

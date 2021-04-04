@@ -87,7 +87,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       integration: new LambdaWebSocketIntegration({handler: onConnect})
     });
     websocketApi.addRoute('$disconnect', {
-      integration: new LambdaWebSocketIntegration({handler: onConnect})
+      integration: new LambdaWebSocketIntegration({handler: onDisconnect})
     });
     websocketApi.addRoute('$default', {
       integration: new LambdaWebSocketIntegration({handler: onUserlistRequest})
