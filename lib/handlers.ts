@@ -3,24 +3,23 @@ import {APIGatewayProxyEventBase, APIGatewayProxyResult} from 'aws-lambda';
 
 type WebsocketEvent = APIGatewayProxyEventBase<{}>
 
-function parsePropsFromEnvs(): Result<ChatApplicationProps, Error>{
+function parsePropsFromEnvs(event: WebsocketEvent): Result<ChatApplicationProps, Error>{
     const CONNECTION_TABLE_NAME = process.env['CONNECTION_TABLE_NAME'];
     const USERID_INDEX_NAME = process.env['USERID_INDEX_NAME'];
-    const WEBSOCKET_ENDPOINT = process.env['WEBSOCKET_ENDPOINT'];
     
-    if(!!CONNECTION_TABLE_NAME && !!USERID_INDEX_NAME && !!WEBSOCKET_ENDPOINT){
+    if(!!CONNECTION_TABLE_NAME && !!USERID_INDEX_NAME){
         return new Ok({
             connectionTableName: CONNECTION_TABLE_NAME,
             useridIndexName:USERID_INDEX_NAME,
-            websocketEndpoint: WEBSOCKET_ENDPOINT
+            websocketEndpoint: `${event.requestContext.domainName}/${event.requestContext.stage}` 
         });
     }else{
-        return new Err(new Error('Environment Variables "CONNECTION_TABLE_NAME","USERID_INDEX_NAME","WEBSOCKET_ENDPOINT", are required'));
+        return new Err(new Error('Environment Variables "CONNECTION_TABLE_NAME","USERID_INDEX_NAME" are required'));
     }
 }
 
 export const onConnectHandler = async (event: WebsocketEvent):Promise<APIGatewayProxyResult> => {
-    const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
+    const appResult = parsePropsFromEnvs(event).map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
     const app = appResult.value;
@@ -43,7 +42,7 @@ export const onConnectHandler = async (event: WebsocketEvent):Promise<APIGateway
 }
 
 export const onDisconnectHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> => {
-    const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
+    const appResult = parsePropsFromEnvs(event).map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
     const app = appResult.value;
@@ -95,7 +94,7 @@ function parseBody<T>(event: WebsocketEvent, typeGuard: (obj:any) => obj is T): 
 }
 
 export const roomMessageHandler = async (event: WebsocketEvent):Promise<APIGatewayProxyResult> =>{
-    const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
+    const appResult = parsePropsFromEnvs(event).map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
     const app = appResult.value;
@@ -118,7 +117,7 @@ export const roomMessageHandler = async (event: WebsocketEvent):Promise<APIGatew
 } 
 
 export const directMessageHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> =>{
-    const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
+    const appResult = parsePropsFromEnvs(event).map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
     const app = appResult.value;
@@ -141,7 +140,7 @@ export const directMessageHandler = async (event: WebsocketEvent): Promise<APIGa
 }
 
 export const userListRequestHandler = async (event: WebsocketEvent): Promise<APIGatewayProxyResult> => {
-    const appResult = parsePropsFromEnvs().map(props => createChatApp(props));
+    const appResult = parsePropsFromEnvs(event).map(props => createChatApp(props));
     
     if(appResult.isErr()) throw appResult.value;
     const app = appResult.value;
