@@ -5,8 +5,12 @@ import * as apigw from '@aws-cdk/aws-apigatewayv2';
 import * as iam from '@aws-cdk/aws-iam';
 import {LambdaWebSocketIntegration} from '@aws-cdk/aws-apigatewayv2-integrations';
 
+export interface CdkWebsocketChatStackProps extends cdk.StackProps{
+  stage: string
+}
+
 export class CdkWebsocketChatStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, props: CdkWebsocketChatStackProps) {
     super(scope, id, props);
 
     const connectionTable = new dynamodb.Table(this, 'connection-table', {
@@ -24,7 +28,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
     const websocketApi = new apigw.WebSocketApi(this, 'chat-ws-api', {routeSelectionExpression: '$request.body.action'});
     const websocketPostPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      resources: [`arn:aws:execute-api:${this.region}:${this.account}:${websocketApi.apiId}/*/POST/@connections/*`],
+      resources: [`arn:aws:execute-api:${this.region}:${this.account}:${websocketApi.apiId}/${props.stage}/POST/@connections/*`],
       actions: ["execute-api:ManageConnections"]
     });
 
@@ -96,6 +100,11 @@ export class CdkWebsocketChatStack extends cdk.Stack {
     });
     websocketApi.addRoute('userlistrequest', {
       integration: new LambdaWebSocketIntegration({handler: onUserlistRequest})
+    });
+
+    new apigw.WebSocketStage(this, props.stage, {
+      stageName: props.stage,
+      webSocketApi: websocketApi
     });
   }
 }

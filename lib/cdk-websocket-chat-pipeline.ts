@@ -9,7 +9,7 @@ class WebsocketChatApplication extends Stage{
     constructor(scope: Construct, id: string, props?: StageProps){
         super(scope, id, props);
 
-        new CdkWebsocketChatStack(this, 'webchatapp');
+        new CdkWebsocketChatStack(this, 'webchatapp', {stage: id});
     }
 }
 

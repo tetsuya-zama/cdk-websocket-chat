@@ -5,7 +5,7 @@ import * as CdkWebsocketChat from '../lib/cdk-websocket-chat-stack';
 test('Websocket chat Stack', () => {
     const app = new cdk.App();
     // WHEN
-    const stack = new CdkWebsocketChat.CdkWebsocketChatStack(app, 'MyTestStack');
+    const stack = new CdkWebsocketChat.CdkWebsocketChatStack(app, 'MyTestStack', {stage: 'unittest'});
     // THEN
     expect(stack).toHaveResourceLike('AWS::DynamoDB::Table', {
       "KeySchema": [
@@ -74,7 +74,7 @@ test('Websocket chat Stack', () => {
     expect(stack).toHaveResourceLike('AWS::ApiGatewayV2::Route', {
       "RouteKey": "directmessage"
     });
-    
+
     expect(stack).toHaveResourceLike('AWS::ApiGatewayV2::Route', {
       "RouteKey": "userlistrequest"
     });
