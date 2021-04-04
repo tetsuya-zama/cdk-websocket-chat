@@ -88,7 +88,7 @@ function isDirectMessageBody(obj: any): obj is DirectMessageBody{
 function parseBody<T>(event: WebsocketEvent, typeGuard: (obj:any) => obj is T): Result<T, Error>{
     if(!event.body) return new Err(Error('Cannot parse empty request body.'));
     
-    const body = JSON.stringify(event.body);
+    const body = JSON.parse(event.body);
     
     return typeGuard(body) ? new Ok(body) : new Err(new Error(`Cannot parse request body:${body}`));
 }
