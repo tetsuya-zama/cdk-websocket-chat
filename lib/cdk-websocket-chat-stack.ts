@@ -35,7 +35,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
     const lmdEnvironments = {
       CONNECTION_TABLE_NAME: connectionTable.tableName,
       USERID_INDEX_NAME: useridIdxName,
-      WEBSOCKET_ENDPOINT: websocketApi.apiEndpoint
+      WEBSOCKET_ENDPOINT: `${websocketApi.apiEndpoint.substr("wss://".length)}/${props.stage}`
     }
 
     const onConnect = new lmdjs.NodejsFunction(this, 'on-connect', {
@@ -104,7 +104,8 @@ export class CdkWebsocketChatStack extends cdk.Stack {
 
     new apigw.WebSocketStage(this, props.stage, {
       stageName: props.stage,
-      webSocketApi: websocketApi
+      webSocketApi: websocketApi,
+      autoDeploy: true
     });
   }
 }
