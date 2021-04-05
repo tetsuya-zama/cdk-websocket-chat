@@ -9,12 +9,12 @@ interface IMessage {
     payload: any
 }
 
-const config: WebSocketSubjectConfig<IMessage> = {
-    url: ENDPOINT
-}
 
 describe("webchat api", () => {
     it("is simply connect to api", done => {
+        const config: WebSocketSubjectConfig<IMessage> = {
+            url: `${ENDPOINT}?user=cypress`
+        }
         cy.stream(config).then(subject => {
             subject
                 .pipe(
