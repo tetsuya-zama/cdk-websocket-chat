@@ -1,8 +1,15 @@
 *.js
+!cypress/*/*.js
 !jest.config.js
 *.d.ts
 node_modules
 
+yarn-error.log
+
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# cypress test results
+cypress/screenshots
+cypress/videos

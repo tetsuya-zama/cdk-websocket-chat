@@ -12,11 +12,14 @@
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.96.0",
+    "@lensesio/cypress-websocket-testing": "^1.0.1",
     "@types/aws-lambda": "^8.10.73",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "aws-cdk": "1.96.0",
+    "cypress": "^6.8.0",
     "jest": "^26.4.2",
+    "rxjs": "^6.6.7",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
     "typescript": "~3.9.7"
