@@ -4,19 +4,24 @@ import * as lmdjs from '@aws-cdk/aws-lambda-nodejs';
 import * as apigw from '@aws-cdk/aws-apigatewayv2';
 import * as iam from '@aws-cdk/aws-iam';
 import {LambdaWebSocketIntegration} from '@aws-cdk/aws-apigatewayv2-integrations';
+import { RemovalPolicy } from '@aws-cdk/core';
 
+export type StageName = 'unittest' | 'local' | 'staging' | 'e2e' | 'prod' 
 export interface CdkWebsocketChatStackProps extends cdk.StackProps{
-  stage: string
+  stage: StageName
 }
 
 export class CdkWebsocketChatStack extends cdk.Stack {
+  public readonly webScoketEndpoint: string;
+
   constructor(scope: cdk.Construct, id: string, props: CdkWebsocketChatStackProps) {
     super(scope, id, props);
 
     const connectionTable = new dynamodb.Table(this, 'connection-table', {
       partitionKey: {name: "h_key", type: dynamodb.AttributeType.STRING},
       sortKey: {name: "s_key", type: dynamodb.AttributeType.STRING},
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: props.stage === 'e2e' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN
     });
 
     const useridIdxName = "user_id_idx";
@@ -106,5 +111,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       webSocketApi: websocketApi,
       autoDeploy: true
     });
+
+    this.webScoketEndpoint = `${websocketApi.apiEndpoint}/${props.stage}`;
   }
 }

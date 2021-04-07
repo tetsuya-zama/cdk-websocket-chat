@@ -1,15 +1,25 @@
-import {CdkWebsocketChatStack} from './cdk-websocket-chat-stack';
+import {CdkWebsocketChatStack, StageName} from './cdk-websocket-chat-stack';
 
-import {Construct, SecretValue, Stack, StackProps, Stage, StageProps} from '@aws-cdk/core';
+import {CfnOutput, Construct, SecretValue, Stack, StackProps, Stage, StageProps} from '@aws-cdk/core';
 import {Artifact} from '@aws-cdk/aws-codepipeline';
 import {GitHubSourceAction} from '@aws-cdk/aws-codepipeline-actions';
-import {CdkPipeline, SimpleSynthAction} from '@aws-cdk/pipelines';
+import {CdkPipeline, ShellScriptAction, SimpleSynthAction} from '@aws-cdk/pipelines';
+import {PolicyStatement} from '@aws-cdk/aws-iam';
+
+interface WebsocketChatApplicationProps extends StageProps {
+    stage: StageName
+}
 
 class WebsocketChatApplication extends Stage{
-    constructor(scope: Construct, id: string, props?: StageProps){
+    public readonly websocketEndpoint: CfnOutput
+    public readonly stackName: CfnOutput
+
+    constructor(scope: Construct, id: string, props: WebsocketChatApplicationProps){
         super(scope, id, props);
 
-        new CdkWebsocketChatStack(this, 'webchatapp', {stage: id});
+        const stack = new CdkWebsocketChatStack(this, 'webchatapp', {stage: props.stage});
+        this.websocketEndpoint = new CfnOutput(stack, 'WEBSOCKET_ENDPOINT', {value: stack.webScoketEndpoint });
+        this.stackName = new CfnOutput(stack, 'STACK_NAME', {value: stack.stackName });
     }
 }
 
@@ -42,12 +52,37 @@ export class CdkWebsocketChatPipeline extends Stack {
             })
         });
 
-        pipeline.addApplicationStage(
-            new WebsocketChatApplication(this, 'staging')
-        );
+        const testingStage = pipeline.addStage('testing');
+        testingStage.addApplication(new WebsocketChatApplication(this, 'staging', {stage: 'staging'}));
+        testingStage.nextSequentialRunOrder(-2);
+        const e2eApplication = new WebsocketChatApplication(this, 'e2e', {stage: 'e2e'});
+        testingStage.addApplication(e2eApplication);
+        testingStage.addActions(new ShellScriptAction({
+            actionName: 'cypress-testing',
+            commands: [
+                'npm install -g yarn aws-cli',
+                'yarn',
+                'npx run cypress run --env endpoint=${WEBSOCKET_ENDPOINT}',
+                'aws cloudformation delete-stack --stack-name ${STACK_NAME}'
+            ],
+            additionalArtifacts: [sourceArtifact],
+            useOutputs: {
+                WEBSOCKET_ENDPOINT: pipeline.stackOutput(e2eApplication.websocketEndpoint),
+                STACK_NAME: pipeline.stackOutput(e2eApplication.stackName)
+            },
+            rolePolicyStatements: [
+                new PolicyStatement({
+                    actions: [
+                        'cloudformation:DeleteStack',
+                        'cloudformation:DescribeStacks'
+                    ],
+                    resources: ['*']
+                })
+            ]
+        }));
 
         pipeline.addApplicationStage(
-            new WebsocketChatApplication(this, 'prod'),
+            new WebsocketChatApplication(this, 'prod', {stage: 'prod'}),
             {manualApprovals: true}
         );
     }

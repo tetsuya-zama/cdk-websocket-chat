@@ -13,3 +13,5 @@ cdk.out
 # cypress test results
 cypress/screenshots
 cypress/videos
+
+.DS_Store
