@@ -62,7 +62,7 @@ export class CdkWebsocketChatPipeline extends Stack {
             commands: [
                 'npm install -g yarn aws-cli',
                 'yarn',
-                'npx run cypress run --env endpoint=${WEBSOCKET_ENDPOINT}',
+                'npx cypress run --env endpoint=${WEBSOCKET_ENDPOINT}',
                 'aws cloudformation delete-stack --stack-name ${STACK_NAME}'
             ],
             additionalArtifacts: [sourceArtifact],
