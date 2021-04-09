@@ -110,7 +110,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       integration: new LambdaWebSocketIntegration({handler: onUserlistRequest})
     });
 
-    new apigw.WebSocketStage(this, props.stage, {
+    const currentStage = new apigw.WebSocketStage(this, props.stage, {
       stageName: props.stage,
       webSocketApi: websocketApi,
       autoDeploy: true
@@ -126,26 +126,26 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       dashboard.addWidgets(
         new GraphWidget({
           title: 'count',
-          left: [websocketApi.metricCount()]
+          left: [currentStage.metricCount()]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
           title: 'data processed',
-          left: [websocketApi.metricDataProcessed()]
+          left: [currentStage.metricDataProcessed()]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
           title: 'latency',
-          left: [websocketApi.metricLatency()]
+          left: [currentStage.metricLatency()]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
           title: 'errors',
-          left: [websocketApi.metricServerError()],
-          right: [websocketApi.metricClientError()]
+          left: [currentStage.metricServerError()],
+          right: [currentStage.metricClientError()]
         })
       );
     }
