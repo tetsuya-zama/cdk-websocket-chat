@@ -1,5 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import * as lmd from '@aws-cdk/aws-lambda';
 import * as lmdjs from '@aws-cdk/aws-lambda-nodejs';
 import * as apigw from '@aws-cdk/aws-apigatewayv2';
 import * as iam from '@aws-cdk/aws-iam';
@@ -45,6 +46,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
     const onConnect = new lmdjs.NodejsFunction(this, 'on-connect', {
       entry: "./lib/handlers.ts",
       handler: "onConnectHandler",
+      tracing: (props.stage === 'prod' || props.stage === 'staging' || props.stage === 'e2e') ? lmd.Tracing.ACTIVE : lmd.Tracing.DISABLED,
       environment: lmdEnvironments
     });
 
