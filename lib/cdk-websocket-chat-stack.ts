@@ -4,8 +4,10 @@ import * as lmd from '@aws-cdk/aws-lambda';
 import * as lmdjs from '@aws-cdk/aws-lambda-nodejs';
 import * as apigw from '@aws-cdk/aws-apigatewayv2';
 import * as iam from '@aws-cdk/aws-iam';
+import * as watch from '@aws-cdk/aws-cloudwatch';
 import {LambdaWebSocketIntegration} from '@aws-cdk/aws-apigatewayv2-integrations';
 import { RemovalPolicy } from '@aws-cdk/core';
+import { GraphWidget } from '@aws-cdk/aws-cloudwatch';
 
 export type StageName = 'unittest' | 'local' | 'staging' | 'e2e' | 'prod' 
 export interface CdkWebsocketChatStackProps extends cdk.StackProps{
@@ -115,5 +117,37 @@ export class CdkWebsocketChatStack extends cdk.Stack {
     });
 
     this.webScoketEndpoint = `${websocketApi.apiEndpoint}/${props.stage}`;
+
+    if(props.stage === 'prod' || props.stage === 'staging'){
+      const dashboard = new watch.Dashboard(this, `wabchatdashboard`, {
+        dashboardName: `webchat-${props.stage}`,
+      });
+
+      dashboard.addWidgets(
+        new GraphWidget({
+          title: 'count',
+          left: [websocketApi.metricCount()]
+        })
+      );
+      dashboard.addWidgets(
+        new GraphWidget({
+          title: 'data processed',
+          left: [websocketApi.metricDataProcessed()]
+        })
+      );
+      dashboard.addWidgets(
+        new GraphWidget({
+          title: 'latency',
+          left: [websocketApi.metricLatency()]
+        })
+      );
+      dashboard.addWidgets(
+        new GraphWidget({
+          title: 'errors',
+          left: [websocketApi.metricServerError()],
+          right: [websocketApi.metricClientError()]
+        })
+      );
+    }
   }
 }

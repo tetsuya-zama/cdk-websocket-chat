@@ -171,7 +171,7 @@
     "@aws-cdk/core" "1.97.0"
     constructs "^3.3.69"
 
-"@aws-cdk/aws-cloudwatch@1.97.0":
+"@aws-cdk/aws-cloudwatch@1.97.0", "@aws-cdk/aws-cloudwatch@^1.97.0":
   version "1.97.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudwatch/-/aws-cloudwatch-1.97.0.tgz#d9a65e89a64b7e01497bf7fbef015304884c10d9"
   integrity sha512-+SA33W6MTYCBUCohCoVHI15dKEWoY8MA84Kr2N7Qw/zI2DPyLljg46z7JbKNRjh95udrLyGEA4JYzm0U8x3o2g==
