@@ -144,7 +144,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       dashboard.addWidgets(
         new GraphWidget({
           title: 'errors',
-          left: [currentStage.metric('IntegrationLatency')],
+          left: [currentStage.metric('IntegrationError')],
           right: [currentStage.metric('ClientError')]
         })
       );
