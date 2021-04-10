@@ -125,27 +125,27 @@ export class CdkWebsocketChatStack extends cdk.Stack {
 
       dashboard.addWidgets(
         new GraphWidget({
-          title: 'count',
-          left: [currentStage.metricCount()]
+          title: 'connect count',
+          left: [currentStage.metric('ConnectCount')]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
-          title: 'data processed',
-          left: [currentStage.metricDataProcessed()]
+          title: 'message count',
+          left: [currentStage.metric('MessageCount')]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
           title: 'latency',
-          left: [currentStage.metricLatency()]
+          left: [currentStage.metric('IntegrationLatency')]
         })
       );
       dashboard.addWidgets(
         new GraphWidget({
           title: 'errors',
-          left: [currentStage.metricServerError()],
-          right: [currentStage.metricClientError()]
+          left: [currentStage.metric('IntegrationLatency')],
+          right: [currentStage.metric('ClientError')]
         })
       );
     }
