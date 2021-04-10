@@ -126,7 +126,7 @@ export class CdkWebsocketChatStack extends cdk.Stack {
       dashboard.addWidgets(
         new GraphWidget({
           title: 'connect count',
-          left: [currentStage.metric('ConnectCount')]
+          left: [currentStage.metric('ConnectCount', {region:""})]
         })
       );
       dashboard.addWidgets(
